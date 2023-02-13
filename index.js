@@ -27,26 +27,14 @@ app.get('/', (req, res) => {
 
 
 // ROUTES ================================================================
-
-app.use('/api/v1/home', routes.Home);
-
-app.use('/api/v1/about', routes.About);
-
-app.use('/api/v1/blog', routes.Blog);
-
-app.use('/api/v1/career', routes.Career);
-
-app.use('/api/v1/contact', routes.Contact);
-
-app.use('/api/v1/franchise', routes.Franchise);
-
-app.use('/api/v1/membership', routes.Membership);
-
-app.use('/api/v1/partners', routes.Partners);
-
-app.use('/api/v1/profile', routes.Profile);
+// DASHBOARD 
+app.use('/api/v1/auth', routes.Auth);
+app.use('/api/v1/dashboard/state', routes.State);
 
 app.use('/api/v1/contact-mail', routes.Nodemailer);
+
+
+
 
 
 

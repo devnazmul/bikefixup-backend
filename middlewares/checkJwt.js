@@ -4,9 +4,9 @@ const checkJwt = async (req, res, next) => {
     try {
         const token = authorization.split(' ')[1]
         const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-        const { id, username } = decoded;
+        const { id, role } = decoded;
         req.id = id;
-        req.username = username;
+        req.role = role;
         next();
     } catch {
         next("Authentication Failed!")
