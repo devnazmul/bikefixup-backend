@@ -1,5 +1,5 @@
 const router = require('express').Router(); 
-const State = require('../../../controllers/Dashboard/State/StateControllers');
+const {State} = require('../../../controllers');
 const checkJwt = require('../../../middlewares/checkJwt');
 
 router.post('/create',State.Create)

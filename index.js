@@ -28,10 +28,12 @@ app.get('/', (req, res) => {
 
 // ROUTES ================================================================
 // DASHBOARD 
-app.use('/api/v1/auth', routes.Auth);
-app.use('/api/v1/dashboard/state', routes.State);
+app.use('/api/v1/auth', routes?.Auth);
+app.use('/api/v1/dashboard/user', routes?.User);
+app.use('/api/v1/dashboard/state', routes?.State);
+app.use('/api/v1/dashboard/city', routes?.City);
 
-app.use('/api/v1/contact-mail', routes.Nodemailer);
+app.use('/api/v1/contact-mail', routes?.Nodemailer);
 
 
 

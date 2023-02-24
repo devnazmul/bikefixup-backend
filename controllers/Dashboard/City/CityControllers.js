@@ -2,31 +2,31 @@ const connection = require('../../../db');
 
 const Create = async (req, res) => {
     const data = [
+        req.body.state_id,
         req.body.name,
         req.body.is_serviceable,
     ]
 
     // CHECK USER DUPLICATION 
-    const checkEmailQuery = `SELECT * FROM states WHERE name = ?`;
+    const checkEmailQuery = `SELECT * FROM cities WHERE name = ?`;
     connection.query(checkEmailQuery, [req.body.name], (error, results) => {
         if (error) {
             res.status(500).send({
                 error: true,
-                data: [],
+                data: [error],
                 message: `Something is wrong!`
             })
-        }
+        } 
 
         if (results.length > 0) {
             res.status(500).send({
                 error: true,
-                data: [],
-                message: `State is already exist!`
+                data: [results],
+                message: `City is already exist!`
             })
         } else {
-
             // INSERT USER INTO DATABASE 
-            const insertQuery = `INSERT INTO states (name,is_serviceable) VALUES (?,?)`;
+            const insertQuery = `INSERT INTO cities (state_id,name,is_serviceable) VALUES (?,?,?)`;
             connection.query(insertQuery, data, (error, results) => {
                 if (error) {
                     res.status(500).send({
@@ -39,7 +39,7 @@ const Create = async (req, res) => {
                 res.status(200).send({
                     error: false,
                     data: results,
-                    message: 'State created successfully.'
+                    message: 'City created successfully.'
                 })
 
             })
@@ -48,17 +48,18 @@ const Create = async (req, res) => {
 }
 
 const Read = async (req, res) => {
-    const getAllStatesQuery = req.query.search ?
-        `SELECT * FROM states WHERE name LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
-        :
-        `SELECT * FROM states ORDER BY name LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+    let getAllCitiesQuery = `SELECT * FROM cities ORDER BY name LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+    let countTotalCitiesQery = `SELECT COUNT(*) FROM cities;`
 
-    let countTotalStatesQery = req.query.search ?
-        `SELECT COUNT(*) FROM states WHERE name LIKE '%${req.query.search}%';`
-        :
-        `SELECT COUNT(*) FROM states;`
 
-    connection.query(countTotalStatesQery, (error1, result1) => {
+    if (req.query?.search) {
+        getAllCitiesQuery = `SELECT * FROM cities WHERE name LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+
+        countTotalCitiesQery = `SELECT COUNT(*) FROM cities WHERE name LIKE '%${req.query.search}%';`;
+    }
+
+
+    connection.query(countTotalCitiesQery, (error1, result1) => {
         if (error1) {
             res.status(500).send({
                 error: true,
@@ -66,7 +67,7 @@ const Read = async (req, res) => {
                 message: `Something is wrong!`
             })
         }
-        connection.query(getAllStatesQuery, (error, result) => {
+        connection.query(getAllCitiesQuery, (error, result) => {
             if (error) {
                 res.status(500).send({
                     error: true,
@@ -83,35 +84,34 @@ const Read = async (req, res) => {
                     total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
                     result
                 },
-                message: 'States are loaded.'
+                message: 'Cities are loaded.'
             })
         })
-
     })
 }
 
+
 const Update = async (req, res) => {
-    const updateStateQuery = `UPDATE states SET name=? WHERE id=${req.body.id}`;
-    connection.query(updateStateQuery, [req.body?.name], (error, results) => {
+    const updateCityQuery = `UPDATE cities SET name=?, state_id=? WHERE id=${req.body.id}`;
+    connection.query(updateCityQuery, [req.body?.name, req.body?.state_id], (error, results) => {
         if (error) {
             res.status(500).send({
                 error: true,
                 data: [error],
-                message: `Something is wrong!`
+                message: `Something is wrong!`  
             })
         }
         res.status(200).send({
             error: false,
             data: results,
-            message: 'State updated successfully.'
+            message: 'City updated successfully.'
         })
     })
 }
 
 const Delete = async (req, res) => {
-    const deleteSingleStateQuery = `DELETE FROM states WHERE id=${req.body.id}`;
-
-    connection.query(deleteSingleStateQuery, (error, result) => {
+    const deleteSingleCitieQuery = `DELETE FROM cities WHERE id=${req.body.id}`;
+    connection.query(deleteSingleCitieQuery, (error, result) => {
         if (error) {
             res.status(500).send({
                 error: true,
