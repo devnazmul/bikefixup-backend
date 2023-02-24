@@ -48,17 +48,17 @@ const Create = async (req, res) => {
 }
 
 const Read = async (req, res) => {
-    const getAllStatesQuery = req.query.search ?
-        `SELECT * FROM states WHERE name LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+    const getAllBrandsQuery = req.query.search ?
+        `SELECT * FROM brands WHERE name LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
         :
-        `SELECT * FROM states ORDER BY name LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+        `SELECT * FROM brands ORDER BY name LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
 
-    let countTotalStatesQery = req.query.search ?
-        `SELECT COUNT(*) FROM states WHERE name LIKE '%${req.query.search}%';`
+    let countTotalBrandsQery = req.query.search ?
+        `SELECT COUNT(*) FROM brands WHERE name LIKE '%${req.query.search}%';`
         :
-        `SELECT COUNT(*) FROM states;`
+        `SELECT COUNT(*) FROM brands;`
 
-    connection.query(countTotalStatesQery, (error1, result1) => {
+    connection.query(countTotalBrandsQery, (error1, result1) => {
         if (error1) {
             res.status(500).send({
                 error: true,
@@ -66,7 +66,7 @@ const Read = async (req, res) => {
                 message: `Something is wrong!`
             })
         }
-        connection.query(getAllStatesQuery, (error, result) => {
+        connection.query(getAllBrandsQuery, (error, result) => {
             if (error) {
                 res.status(500).send({
                     error: true,
@@ -83,7 +83,7 @@ const Read = async (req, res) => {
                     total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
                     result
                 },
-                message: 'States are loaded.'
+                message: 'brands are loaded.'
             })
         })
 
@@ -91,7 +91,7 @@ const Read = async (req, res) => {
 }
 
 const Update = async (req, res) => {
-    const updateStateQuery = `UPDATE states SET name=? WHERE id=${req.body.id}`;
+    const updateStateQuery = `UPDATE brands SET name=? WHERE id=${req.body.id}`;
     connection.query(updateStateQuery, [req.body?.name], (error, results) => {
         if (error) {
             res.status(500).send({
@@ -109,7 +109,7 @@ const Update = async (req, res) => {
 }
 
 const Delete = async (req, res) => {
-    const deleteSingleStateQuery = `DELETE FROM states WHERE id=${req.body.id}`;
+    const deleteSingleStateQuery = `DELETE FROM brands WHERE id=${req.body.id}`;
 
     connection.query(deleteSingleStateQuery, (error, result) => {
         if (error) {
