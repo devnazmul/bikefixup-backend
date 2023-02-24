@@ -124,7 +124,6 @@ const Update = async (req, res) => {
 const Delete = async (req, res) => {
     if (req.body.id) {
         const deleteSingleStateQuery = `DELETE FROM brands WHERE id=${req.body.id}`;
-
         connection.query(deleteSingleStateQuery, (error, result) => {
             if (error) {
                 res.status(500).send({
@@ -142,7 +141,7 @@ const Delete = async (req, res) => {
     }else{
         res.status(500).send({
             error: true,
-            data: [error],
+            data: [],
             message: `id is required!`
         })
     }
