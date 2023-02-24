@@ -48,26 +48,56 @@ const connection = require('../../../db');
 // }
 
 const Read = async (req, res) => {
-    let getAllUsersQuery = `SELECT * FROM users ORDER BY id DESC LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+    if (req.body.pageNo && req.body.dataPerPage) {
+        let getAllUsersQuery = `SELECT * FROM users ORDER BY id DESC LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
 
-    let countTotalUsersQery = `SELECT COUNT(*) FROM users;`
+        let countTotalUsersQery = `SELECT COUNT(*) FROM users;`
 
-    if (req.query?.search) {
-        getAllUsersQuery = `SELECT * FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+        if (req.query?.search) {
+            getAllUsersQuery = `SELECT * FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
 
-        countTotalUserQery = `SELECT COUNT(*) FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%';`;
-    }
-
-
-    connection.query(countTotalUsersQery, (error1, result1) => {
-        if (error1) {
-            res.status(500).send({
-                error: true,
-                data: [error1],
-                message: `Something is wrong!`
-            })
+            countTotalUserQery = `SELECT COUNT(*) FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%';`;
         }
-        connection.query(getAllUsersQuery, (error, result) => {
+        connection.query(countTotalUsersQery, (error1, result1) => {
+            if (error1) {
+                res.status(500).send({
+                    error: true,
+                    data: [error1],
+                    message: `Something is wrong!`
+                })
+            }
+            connection.query(getAllUsersQuery, (error, result) => {
+                if (error) {
+                    res.status(500).send({
+                        error: true,
+                        data: [error],
+                        message: `Something is wrong!`
+                    })
+                }
+                res.status(200).send({
+                    error: false,
+                    data: {
+                        total_data: result1[0]['COUNT(*)'],
+                        page_no: req?.body?.pageNo,
+                        per_page: req?.body?.dataPerPage,
+                        total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
+                        result
+                    },
+                    message: 'All users are loaded.'
+                })
+            })
+        })
+    } else {
+        if (req.query?.search) {
+            getAllUsersQuery = `SELECT * FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+
+            countTotalUserQery = `SELECT COUNT(*) FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%';`;
+        }
+        const getAllUsersWithoutPaginationQuery = req.query.search ?
+            `SELECT * FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%';`
+            :
+            `SELECT * FROM users ORDER BY id DESC;`
+        connection.query(getAllUsersWithoutPaginationQuery, (error, result) => {
             if (error) {
                 res.status(500).send({
                     error: true,
@@ -78,53 +108,68 @@ const Read = async (req, res) => {
             res.status(200).send({
                 error: false,
                 data: {
-                    total_data: result1[0]['COUNT(*)'],
-                    page_no: req?.body?.pageNo,
-                    per_page: req?.body?.dataPerPage,
-                    total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
+                    total_data: result.length,
                     result
                 },
                 message: 'All users are loaded.'
             })
         })
-    })
+    }
 
 }
 
 const Update = async (req, res) => {
-    const updateUserQuery = `UPDATE users SET role=? WHERE id=${req.body.id}`;
-    connection.query(updateUserQuery, [req.body?.role], (error, results) => {
-        if (error) {
-            res.status(500).send({
-                error: true,
-                data: [error],
-                message: `Something is wrong!`
+    if (req.body.id && req.body.role) {
+        const updateUserQuery = `UPDATE users SET role=? WHERE id=${req.body.id}`;
+        connection.query(updateUserQuery, [req.body?.role], (error, results) => {
+            if (error) {
+                res.status(500).send({
+                    error: true,
+                    data: [error],
+                    message: `Something is wrong!`
+                })
+            }
+            res.status(200).send({
+                error: false,
+                data: results,
+                message: 'Role changed successfully.'
             })
-        }
-        res.status(200).send({
-            error: false,
-            data: results,
-            message: 'Role changed successfully.'
         })
-    })
+    } else {
+        res.status(500).send({
+            error: true,
+            data: [error],
+            message: `id and role is required!`
+        })
+    }
+
 }
 
 const Delete = async (req, res) => {
-    const deleteSingleUserQuery = `DELETE FROM users WHERE id=${req.body.id}`;
-    connection.query(deleteSingleUserQuery, (error, result) => {
-        if (error) {
-            res.status(500).send({
-                error: true,
-                data: [error],
-                message: `Something is wrong!`
+    if (req.body.id) {
+        const deleteSingleUserQuery = `DELETE FROM users WHERE id=${req.body.id}`;
+        connection.query(deleteSingleUserQuery, (error, result) => {
+            if (error) {
+                res.status(500).send({
+                    error: true,
+                    data: [error],
+                    message: `Something is wrong!`
+                })
+            }
+            res.status(200).send({
+                error: false,
+                data: result,
+                message: 'User deleted successfully.'
             })
-        }
-        res.status(200).send({
-            error: false,
-            data: result,
-            message: 'User deleted successfully.'
         })
-    })
+    } else {
+        res.status(500).send({
+            error: true,
+            data: [error],
+            message: `id is required!`
+        })
+    }
+
 }
 
 module.exports = {
