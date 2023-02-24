@@ -30,6 +30,7 @@ app.get('/', (req, res) => {
 // DASHBOARD 
 app.use('/api/v1/auth', routes?.Auth);
 app.use('/api/v1/dashboard/user', routes?.User);
+app.use('/api/v1/dashboard/brand', routes?.Brand);
 app.use('/api/v1/dashboard/state', routes?.State);
 app.use('/api/v1/dashboard/city', routes?.City);
 

@@ -2,6 +2,7 @@
 const Nodemailer = require('./Nodemailer');
 const Auth = require('./Auth/AuthRoutes');
 const User = require('./Dashboard/User/UserRoutes');
+const Brand = require('./Dashboard/Brand/BrandRoutes');
 const State = require('./Dashboard/State/StateRoutes');
 const City = require('./Dashboard/City/CityRoutes');
 
@@ -11,6 +12,7 @@ const City = require('./Dashboard/City/CityRoutes');
 module.exports = {
     Nodemailer,
     User,
+    Brand,
     Auth,
     State,
     City
