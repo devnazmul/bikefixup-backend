@@ -7,4 +7,5 @@ router.get('/read',Brand?.Read);
 router.put('/update',Brand?.Update);
 router.delete('/delete',Brand?.Delete);
 
+
 module.exports = router;
