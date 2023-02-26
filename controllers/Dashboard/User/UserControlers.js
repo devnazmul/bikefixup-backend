@@ -49,12 +49,33 @@ const connection = require('../../../db');
 
 const Read = async (req, res) => {
     if (req.body.pageNo && req.body.dataPerPage) {
-        let getAllUsersQuery = `SELECT * FROM users ORDER BY id DESC LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+        let getAllUsersQuery = `
+        SELECT 
+        users.id AS id, 
+        users.name AS name, 
+        users.email AS email,
+        users.phone AS phone,
+        states.name AS state,
+        cities.name AS city
+        FROM users 
+        LEFT JOIN states ON users.state_id = states.id
+        LEFT JOIN cities ON states.id = cities.state_id
+        ORDER BY id DESC LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
 
         let countTotalUsersQery = `SELECT COUNT(*) FROM users;`
 
         if (req.query?.search) {
-            getAllUsersQuery = `SELECT * FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+            getAllUsersQuery = `SELECT 
+            users.id AS id, 
+            users.name AS name, 
+            users.email AS email,
+            users.phone AS phone,
+            states.name AS state,
+            cities.name AS city
+            FROM users 
+            LEFT JOIN states ON users.state_id = states.id
+            LEFT JOIN cities ON states.id = cities.state_id
+             WHERE users.name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
 
             countTotalUsersQery = `SELECT COUNT(*) FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%';`;
         }
