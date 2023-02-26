@@ -59,7 +59,7 @@ const Read = async (req, res) => {
         cities.name AS city
         FROM users 
         LEFT JOIN states ON users.state_id = states.id
-        LEFT JOIN cities ON states.id = cities.state_id
+        LEFT JOIN cities ON users.city_id = cities.id
         ORDER BY id DESC LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
 
         let countTotalUsersQery = `SELECT COUNT(*) FROM users;`
@@ -74,7 +74,7 @@ const Read = async (req, res) => {
             cities.name AS city
             FROM users 
             LEFT JOIN states ON users.state_id = states.id
-            LEFT JOIN cities ON states.id = cities.state_id
+            LEFT JOIN cities ON users.city_id = cities.id
              WHERE users.name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
 
             countTotalUsersQery = `SELECT COUNT(*) FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%';`;
