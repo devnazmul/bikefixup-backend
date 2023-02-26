@@ -48,7 +48,7 @@ const connection = require('../../../db');
 // }
 
 const Read = async (req, res) => {
-    if (req.body.pageNo && req.body.dataPerPage) {
+    if (parseInt(req?.query?.pageNo) && parseInt(req?.query?.dataPerPage)) {
         let getAllUsersQuery = `
         SELECT 
         users.id AS id, 
@@ -60,7 +60,7 @@ const Read = async (req, res) => {
         FROM users 
         LEFT JOIN states ON users.state_id = states.id
         LEFT JOIN cities ON users.city_id = cities.id
-        ORDER BY id DESC LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+        ORDER BY id DESC LIMIT ${(parseInt(req?.query?.pageNo) - 1) * parseInt(req?.query?.dataPerPage)}, ${parseInt(req?.query?.dataPerPage)};`
 
         let countTotalUsersQery = `SELECT COUNT(*) FROM users;`
 
@@ -75,7 +75,7 @@ const Read = async (req, res) => {
             FROM users 
             LEFT JOIN states ON users.state_id = states.id
             LEFT JOIN cities ON users.city_id = cities.id
-             WHERE users.name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+             WHERE users.name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%' LIMIT ${(parseInt(req?.query?.pageNo) - 1) * parseInt(req?.query?.dataPerPage)}, ${parseInt(req?.query?.dataPerPage)};`
 
             countTotalUsersQery = `SELECT COUNT(*) FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%';`;
         }
@@ -99,9 +99,9 @@ const Read = async (req, res) => {
                     error: false,
                     data: {
                         total_data: result1[0]['COUNT(*)'],
-                        page_no: req?.body?.pageNo,
-                        per_page: req?.body?.dataPerPage,
-                        total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
+                        page_no: parseInt(req?.query?.pageNo),
+                        per_page: parseInt(req?.query?.dataPerPage),
+                        total_pages: Math.ceil(result1[0]['COUNT(*)'] / parseInt(req?.query?.dataPerPage)),
                         result
                     },
                     message: 'All users are loaded.'
