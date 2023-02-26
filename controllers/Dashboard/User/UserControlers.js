@@ -110,14 +110,45 @@ const Read = async (req, res) => {
         })
     } else {
         if (req.query?.search) {
-            getAllUsersQuery = `SELECT * FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%';`
+            getAllUsersQuery = `
+            SELECT 
+            users.id AS id, 
+            users.name AS name, 
+            users.email AS email,
+            users.phone AS phone,
+            states.name AS state,
+            cities.name AS city
+            FROM users 
+            LEFT JOIN states ON users.state_id = states.id
+            LEFT JOIN cities ON users.city_id = cities.id
+            WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%';`
 
             countTotalUserQery = `SELECT COUNT(*) FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%';`;
         }
         const getAllUsersWithoutPaginationQuery = req.query.search ?
-            `SELECT * FROM users WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%';`
+            `SELECT 
+            users.id AS id, 
+            users.name AS name, 
+            users.email AS email,
+            users.phone AS phone,
+            states.name AS state,
+            cities.name AS city
+            FROM users 
+            LEFT JOIN states ON users.state_id = states.id
+            LEFT JOIN cities ON users.city_id = cities.id
+            WHERE name LIKE '%${req.query.search}%' OR phone LIKE '%${req.query.search}%' OR email LIKE '%${req.query.search}%';`
             :
-            `SELECT * FROM users ORDER BY id DESC;`
+            `SELECT 
+            users.id AS id, 
+            users.name AS name, 
+            users.email AS email,
+            users.phone AS phone,
+            states.name AS state,
+            cities.name AS city
+            FROM users 
+            LEFT JOIN states ON users.state_id = states.id
+            LEFT JOIN cities ON users.city_id = cities.id
+             ORDER BY id DESC;`
         connection.query(getAllUsersWithoutPaginationQuery, (error, result) => {
             if (error) {
                 res.status(500).send({
