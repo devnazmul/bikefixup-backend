@@ -50,7 +50,7 @@ const Create = async (req, res) => {
 const ReadAll = async (req, res) => { // read by state is
     let getAllCitiesQuery = `SELECT * FROM cities ORDER BY name;`
     if (req.query.state_id) {
-        getAllCitiesQuery = `SELECT * FROM cities WHERE state_id=${req.query.state_id} ORDER BY name;`
+        getAllCitiesQuery = `SELECT * FROM cities WHERE state_id=${parseInt(req.query.state_id)} ORDER BY name;`
     }
     connection.query(getAllCitiesQuery, (error, result) => {
         if (error) {
@@ -80,7 +80,6 @@ const ReadAll = async (req, res) => { // read by state is
 const ReadWithPagination = async (req, res) => {
     let getAllCitiesQuery;
     let countTotalCitiesQery = `SELECT COUNT(*) FROM cities;`
-
 
     if (parseInt(req?.query?.pageNo) && parseInt(req?.query?.dataPerPage)) {
         if (req.query?.search) {
