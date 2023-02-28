@@ -47,10 +47,10 @@ const Create = async (req, res) => {
     })
 }
 
-const ReadAll = async (req, res, next) => {
+const ReadAll = async (req, res) => {
     let getAllCitiesQuery = `SELECT * FROM cities ORDER BY name;`
-    if (req.query.id) {
-        getAllCitiesQuery = `SELECT * FROM cities WHERE id=${req.query.id} ORDER BY name;`
+    if (req.query.state_id) {
+        getAllCitiesQuery = `SELECT * FROM cities WHERE state_id=${req.query.state_id} ORDER BY name;`
     }
     connection.query(getAllCitiesQuery, (error, result) => {
         if (error) {
