@@ -47,7 +47,7 @@ const Create = async (req, res) => {
     })
 }
 
-const ReadAll = async (req, res) => {
+const ReadAll = async (req, res) => { // search by Id optinal
     let getAllStatesQuery = `SELECT * FROM states ORDER BY name;`
     if (req.query.id) {
         getAllStatesQuery = `SELECT * FROM states WHERE id=${req.query.id} ORDER BY name;`
@@ -77,11 +77,14 @@ const ReadAll = async (req, res) => {
     })
 }
 
-const Read = async (req, res) => {
-    const getAllStatesQuery = req.query.search ?
-        `SELECT * FROM states WHERE name LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
-        :
-        `SELECT * FROM states ORDER BY name LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+const ReadWithPagination = async (req, res) => {
+    let getAllStatesQuery = '';
+    if (parseInt(req?.query?.pageNo) && parseInt(req?.query?.dataPerPage)) {
+        getAllStatesQuery = req.query.search ?
+            `SELECT * FROM states WHERE name LIKE '%${req.query.search}%' LIMIT ${(parseInt(req?.query?.pageNo) - 1) * parseInt(req?.query?.dataPerPage)}, ${parseInt(req?.query?.dataPerPage)};`
+            :
+            `SELECT * FROM states ORDER BY name LIMIT ${(parseInt(req?.query?.pageNo) - 1) * parseInt(req?.query?.dataPerPage)}, ${parseInt(req?.query?.dataPerPage)};`
+    }
 
     let countTotalStatesQery = req.query.search ?
         `SELECT COUNT(*) FROM states WHERE name LIKE '%${req.query.search}%';`
@@ -95,8 +98,36 @@ const Read = async (req, res) => {
                 data: [error1],
                 message: `Something is wrong!`
             })
+        } else {
+            connection.query(getAllStatesQuery, (error, result) => {
+                if (error) {
+                    res.status(500).send({
+                        error: true,
+                        data: [error],
+                        message: `Something is wrong!`
+                    })
+                } else {
+                    res.status(200).send({
+                        error: false,
+                        data: {
+                            total_data: result1[0]['COUNT(*)'],
+                            page_no: req?.query?.pageNo,
+                            per_page: req?.query?.dataPerPage,
+                            total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.query?.dataPerPage),
+                            result
+                        },
+                        message: 'States are loaded.'
+                    })
+                }
+            })
         }
-        connection.query(getAllStatesQuery, (error, result) => {
+    })
+}
+
+const Update = async (req, res) => {
+    if (req.role === 'admin') {
+        const updateStateQuery = `UPDATE states SET name=? WHERE id=${req.body.id}`;
+        connection.query(updateStateQuery, [req.body?.name], (error, results) => {
             if (error) {
                 res.status(500).send({
                     error: true,
@@ -106,61 +137,50 @@ const Read = async (req, res) => {
             }
             res.status(200).send({
                 error: false,
-                data: {
-                    total_data: result1[0]['COUNT(*)'],
-                    page_no: req?.body?.pageNo,
-                    per_page: req?.body?.dataPerPage,
-                    total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
-                    result
-                },
-                message: 'States are loaded.'
+                data: results,
+                message: 'State updated successfully.'
             })
         })
-
-    })
-}
-
-const Update = async (req, res) => {
-    const updateStateQuery = `UPDATE states SET name=? WHERE id=${req.body.id}`;
-    connection.query(updateStateQuery, [req.body?.name], (error, results) => {
-        if (error) {
-            res.status(500).send({
-                error: true,
-                data: [error],
-                message: `Something is wrong!`
-            })
-        }
-        res.status(200).send({
-            error: false,
-            data: results,
-            message: 'State updated successfully.'
+    } else {
+        res.status(401).send({
+            error: true,
+            data: [error],
+            message: `Unauthenticated!`
         })
-    })
+    }
 }
 
 const Delete = async (req, res) => {
-    const deleteSingleStateQuery = `DELETE FROM states WHERE id=${req.body.id}`;
-
-    connection.query(deleteSingleStateQuery, (error, result) => {
-        if (error) {
-            res.status(500).send({
-                error: true,
-                data: [error],
-                message: `Something is wrong!`
+    if (req.role === 'admin') {
+        const deleteSingleStateQuery = `DELETE FROM states WHERE id=${req.body.id}`;
+        connection.query(deleteSingleStateQuery, (error, result) => {
+            if (error) {
+                res.status(500).send({
+                    error: true,
+                    data: [error],
+                    message: `Something is wrong!`
+                })
+            }
+            res.status(200).send({
+                error: false,
+                data: result,
+                message: 'Deleted successfully.'
             })
-        }
-        res.status(200).send({
-            error: false,
-            data: result,
-            message: 'Deleted successfully.'
         })
-    })
+
+    } else {
+        res.status(401).send({
+            error: true,
+            data: [error],
+            message: `Unauthenticated!`
+        })
+    }
 }
 
 module.exports = {
     Create,
     ReadAll,
-    Read,
+    ReadWithPagination,
     Update,
     Delete
 }

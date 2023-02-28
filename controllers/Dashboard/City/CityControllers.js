@@ -47,7 +47,7 @@ const Create = async (req, res) => {
     })
 }
 
-const ReadAll = async (req, res) => {
+const ReadAll = async (req, res) => { // read by state is
     let getAllCitiesQuery = `SELECT * FROM cities ORDER BY name;`
     if (req.query.state_id) {
         getAllCitiesQuery = `SELECT * FROM cities WHERE state_id=${req.query.state_id} ORDER BY name;`
@@ -77,16 +77,19 @@ const ReadAll = async (req, res) => {
     })
 }
 
-const Read = async (req, res) => {
-    let getAllCitiesQuery = `SELECT * FROM cities ORDER BY name LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
+const ReadWithPagination = async (req, res) => {
+    let getAllCitiesQuery;
     let countTotalCitiesQery = `SELECT COUNT(*) FROM cities;`
 
-    if (req.query?.search) {
-        getAllCitiesQuery = `SELECT * FROM cities WHERE name LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
 
-        countTotalCitiesQery = `SELECT COUNT(*) FROM cities WHERE name LIKE '%${req.query.search}%';`;
+    if (parseInt(req?.query?.pageNo) && parseInt(req?.query?.dataPerPage)) {
+        if (req.query?.search) {
+            getAllCitiesQuery = `SELECT * FROM cities WHERE name LIKE '%${req.query.search}%' LIMIT ${(parseInt(req?.query?.pageNo) - 1) * parseInt(req?.query?.dataPerPage)}, ${parseInt(req?.query?.dataPerPage)};`
+            countTotalCitiesQery = `SELECT COUNT(*) FROM cities WHERE name LIKE '%${req.query.search}%';`;
+        } else {
+            getAllCitiesQuery = `SELECT * FROM cities ORDER BY name LIMIT ${(parseInt(req?.query?.pageNo) - 1) * parseInt(req?.query?.dataPerPage)}, ${parseInt(req?.query?.dataPerPage)};`
+        }
     }
-
     connection.query(countTotalCitiesQery, (error1, result1) => {
         if (error1) {
             res.status(502).send({
@@ -107,9 +110,9 @@ const Read = async (req, res) => {
                         error: false,
                         data: {
                             total_data: result1[0]['COUNT(*)'],
-                            page_no: req?.body?.pageNo,
-                            per_page: req?.body?.dataPerPage,
-                            total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
+                            page_no: parseInt(req?.query?.pageNo),
+                            per_page: parseInt(req?.query?.dataPerPage),
+                            total_pages: Math.ceil(result1[0]['COUNT(*)'] / parseInt(req?.query?.dataPerPage)),
                             result
                         },
                         message: 'Cities are loaded.'
@@ -121,47 +124,63 @@ const Read = async (req, res) => {
 }
 
 const Update = async (req, res) => {
-    const updateCityQuery = `UPDATE cities SET name=?, state_id=? WHERE id=${req.body.id}`;
-    connection.query(updateCityQuery, [req.body?.name, req.body?.state_id], (error, results) => {
-        if (error) {
-            res.status(502).send({
-                error: true,
-                data: [error],
-                message: `Something is wrong!`
-            })
-        } else {
-            res.status(200).send({
-                error: false,
-                data: results,
-                message: 'City updated successfully.'
-            })
-        }
-    })
+    if (req.role === 'admin') {
+        const updateCityQuery = `UPDATE cities SET name=?, state_id=? WHERE id=${req.body.id}`;
+        connection.query(updateCityQuery, [req.body?.name, req.body?.state_id], (error, results) => {
+            if (error) {
+                res.status(502).send({
+                    error: true,
+                    data: [error],
+                    message: `Something is wrong!`
+                })
+            } else {
+                res.status(200).send({
+                    error: false,
+                    data: results,
+                    message: 'City updated successfully.'
+                })
+            }
+        })
+    } else {
+        res.status(401).send({
+            error: true,
+            data: [error],
+            message: `Unauthenticated!`
+        })
+    }
 }
 
 const Delete = async (req, res) => {
-    const deleteSingleCitieQuery = `DELETE FROM cities WHERE id=${req.body.id}`;
-    connection.query(deleteSingleCitieQuery, (error, result) => {
-        if (error) {
-            res.status(502).send({
-                error: true,
-                data: [error],
-                message: `Something is wrong!`
-            })
-        } else {
-            res.status(200).send({
-                error: false,
-                data: result,
-                message: 'Deleted successfully.'
-            })
-        }
-    })
+    if (req.role === 'admin') {
+        const deleteSingleCitieQuery = `DELETE FROM cities WHERE id=${req.body.id}`;
+        connection.query(deleteSingleCitieQuery, (error, result) => {
+            if (error) {
+                res.status(502).send({
+                    error: true,
+                    data: [error],
+                    message: `Something is wrong!`
+                })
+            } else {
+                res.status(200).send({
+                    error: false,
+                    data: result,
+                    message: 'Deleted successfully.'
+                })
+            }
+        })
+    } else {
+        res.status(401).send({
+            error: true,
+            data: [error],
+            message: `Unauthenticated!`
+        })
+    }
 }
 
 module.exports = {
     Create,
     ReadAll,
-    Read,
+    ReadWithPagination,
     Update,
     Delete
 }

@@ -4,8 +4,8 @@ const checkJwt = require('../../../middlewares/checkJwt');
 
 router.post('/create',checkJwt,City.Create)
 router.get('/read-all',City.ReadAll)
-router.get('/read',City.Read)
-router.put('/update',City.Update)
-router.delete('/delete',City.Delete)
+router.get('/read',City.ReadWithPagination)
+router.put('/update',checkJwt,City.Update)
+router.delete('/delete',checkJwt,City.Delete)
 
 module.exports = router;
