@@ -16,7 +16,7 @@ const Create = async (req, res) => {
                 data: [error],
                 message: `Something is wrong!`
             })
-        } 
+        }
 
         if (results.length > 0) {
             res.status(500).send({
@@ -47,10 +47,39 @@ const Create = async (req, res) => {
     })
 }
 
+const ReadAll = async (req, res, next) => {
+    let getAllCitiesQuery = `SELECT * FROM cities ORDER BY name;`
+    if (req.query.id) {
+        getAllCitiesQuery = `SELECT * FROM cities WHERE id=${req.query.id} ORDER BY name;`
+    }
+    connection.query(getAllCitiesQuery, (error, result) => {
+        if (error) {
+            res.status(502).send({
+                error: true,
+                data: [error],
+                message: `Something is wrong!`
+            })
+        } else {
+            if (result?.length > 0) {
+                res.status(200).send({
+                    error: false,
+                    data: result,
+                    message: 'All cities are loaded.'
+                })
+            } else {
+                res.status(404).send({
+                    error: true,
+                    data: [],
+                    message: `No data fount!`
+                })
+            }
+        }
+    })
+}
+
 const Read = async (req, res) => {
     let getAllCitiesQuery = `SELECT * FROM cities ORDER BY name LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
     let countTotalCitiesQery = `SELECT COUNT(*) FROM cities;`
-
 
     if (req.query?.search) {
         getAllCitiesQuery = `SELECT * FROM cities WHERE name LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
@@ -58,54 +87,55 @@ const Read = async (req, res) => {
         countTotalCitiesQery = `SELECT COUNT(*) FROM cities WHERE name LIKE '%${req.query.search}%';`;
     }
 
-
     connection.query(countTotalCitiesQery, (error1, result1) => {
         if (error1) {
-            res.status(500).send({
+            res.status(502).send({
                 error: true,
                 data: [error1],
                 message: `Something is wrong!`
             })
-        }
-        connection.query(getAllCitiesQuery, (error, result) => {
-            if (error) {
-                res.status(500).send({
-                    error: true,
-                    data: [error],
-                    message: `Something is wrong!`
-                })
-            }
-            res.status(200).send({
-                error: false,
-                data: {
-                    total_data: result1[0]['COUNT(*)'],
-                    page_no: req?.body?.pageNo,
-                    per_page: req?.body?.dataPerPage,
-                    total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
-                    result
-                },
-                message: 'Cities are loaded.'
+        } else {
+            connection.query(getAllCitiesQuery, (error, result) => {
+                if (error) {
+                    res.status(502).send({
+                        error: true,
+                        data: [error],
+                        message: `Something is wrong!`
+                    })
+                } else {
+                    res.status(200).send({
+                        error: false,
+                        data: {
+                            total_data: result1[0]['COUNT(*)'],
+                            page_no: req?.body?.pageNo,
+                            per_page: req?.body?.dataPerPage,
+                            total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
+                            result
+                        },
+                        message: 'Cities are loaded.'
+                    })
+                }
             })
-        })
+        }
     })
 }
-
 
 const Update = async (req, res) => {
     const updateCityQuery = `UPDATE cities SET name=?, state_id=? WHERE id=${req.body.id}`;
     connection.query(updateCityQuery, [req.body?.name, req.body?.state_id], (error, results) => {
         if (error) {
-            res.status(500).send({
+            res.status(502).send({
                 error: true,
                 data: [error],
-                message: `Something is wrong!`  
+                message: `Something is wrong!`
+            })
+        } else {
+            res.status(200).send({
+                error: false,
+                data: results,
+                message: 'City updated successfully.'
             })
         }
-        res.status(200).send({
-            error: false,
-            data: results,
-            message: 'City updated successfully.'
-        })
     })
 }
 
@@ -113,22 +143,24 @@ const Delete = async (req, res) => {
     const deleteSingleCitieQuery = `DELETE FROM cities WHERE id=${req.body.id}`;
     connection.query(deleteSingleCitieQuery, (error, result) => {
         if (error) {
-            res.status(500).send({
+            res.status(502).send({
                 error: true,
                 data: [error],
                 message: `Something is wrong!`
             })
+        } else {
+            res.status(200).send({
+                error: false,
+                data: result,
+                message: 'Deleted successfully.'
+            })
         }
-        res.status(200).send({
-            error: false,
-            data: result,
-            message: 'Deleted successfully.'
-        })
     })
 }
 
 module.exports = {
     Create,
+    ReadAll,
     Read,
     Update,
     Delete

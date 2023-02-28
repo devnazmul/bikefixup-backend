@@ -3,6 +3,7 @@ const {City} = require('../../../controllers');
 const checkJwt = require('../../../middlewares/checkJwt');
 
 router.post('/create',checkJwt,City.Create)
+router.get('/read-all',City.ReadAll)
 router.get('/read',City.Read)
 router.put('/update',City.Update)
 router.delete('/delete',City.Delete)

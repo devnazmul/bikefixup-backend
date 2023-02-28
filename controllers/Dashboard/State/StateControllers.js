@@ -48,20 +48,32 @@ const Create = async (req, res) => {
 }
 
 const ReadAll = async (req, res) => {
-const getAllStatesQuery=`SELECT * FROM states ORDER BY name;`
+    let getAllStatesQuery = `SELECT * FROM states ORDER BY name;`
+    if (req.query.id) {
+        getAllStatesQuery = `SELECT * FROM states WHERE id=${req.query.id} ORDER BY name;`
+    }
     connection.query(getAllStatesQuery, (error, result) => {
         if (error) {
-            res.status(500).send({
+            res.status(502).send({
                 error: true,
                 data: [error],
                 message: `Something is wrong!`
             })
+        } else {
+            if (result?.length > 0) {
+                res.status(200).send({
+                    error: false,
+                    data: result,
+                    message: 'All states are loaded.'
+                })
+            } else {
+                res.status(404).send({
+                    error: true,
+                    data: [],
+                    message: `No data fount!`
+                })
+            }
         }
-        res.status(200).send({
-            error: false,
-            data:result,
-            message: 'All states are loaded.'
-        })
     })
 }
 
