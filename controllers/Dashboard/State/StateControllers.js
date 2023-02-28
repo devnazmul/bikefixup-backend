@@ -47,6 +47,24 @@ const Create = async (req, res) => {
     })
 }
 
+const ReadAll = async (req, res) => {
+const getAllStatesQuery=`SELECT * FROM states ORDER BY name;`
+    connection.query(getAllStatesQuery, (error, result) => {
+        if (error) {
+            res.status(500).send({
+                error: true,
+                data: [error],
+                message: `Something is wrong!`
+            })
+        }
+        res.status(200).send({
+            error: false,
+            data:result,
+            message: 'All states are loaded.'
+        })
+    })
+}
+
 const Read = async (req, res) => {
     const getAllStatesQuery = req.query.search ?
         `SELECT * FROM states WHERE name LIKE '%${req.query.search}%' LIMIT ${(req?.body?.pageNo - 1) * req?.body?.dataPerPage}, ${req?.body?.dataPerPage};`
@@ -129,6 +147,7 @@ const Delete = async (req, res) => {
 
 module.exports = {
     Create,
+    ReadAll,
     Read,
     Update,
     Delete
