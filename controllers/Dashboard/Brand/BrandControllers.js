@@ -47,11 +47,13 @@ const Create = async (req, res) => {
 }
 
 const ReadAll = async (req, res) => {
-    let getAllCitiesQuery = `SELECT * FROM brands ORDER BY name;`
+    let getAllBrandsQuery = `SELECT * FROM brands ORDER BY name;`
+    let getCountAllBrandsQuery = `SELECT COUNT(*) FROM brands`
     if (req.query.id) {
-        getAllCitiesQuery = `SELECT * FROM brands WHERE id=${parseInt(req.query.id)} ORDER BY name;`
+        getAllBrandsQuery = `SELECT * FROM brands WHERE id=${parseInt(req.query.id)} ORDER BY name;`
+        getCountAllBrandsQuery = `SELECT COUNT(*) FROM brands WHERE id=${parseInt(req.query.id)} `
     }
-    connection.query(countTotalBrandsQery, (error1, result1) => {
+    connection.query(getCountAllBrandsQuery, (error1, result1) => {
         if (error1) {
             res.status(500).send({
                 error: true,
@@ -59,16 +61,27 @@ const ReadAll = async (req, res) => {
                 message: `Something is wrong!`
             })
         } else {
-            res.status(200).send({
-                error: false,
-                data: {
-                    total_data: result1[0]['COUNT(*)'],
-                    page_no: req?.body?.pageNo,
-                    per_page: req?.body?.dataPerPage,
-                    total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
-                    result
-                },
-                message: 'brands are loaded.'
+            connection.query(getAllBrandsQuery, (error1, result) => {
+                if (error1) {
+                    res.status(500).send({
+                        error: true,
+                        data: [error1],
+                        message: `Something is wrong!`
+                    })
+                } else {
+                    res.status(200).send({
+                        error: false,
+                        data: {
+                            total_data: result1[0]['COUNT(*)'],
+                            page_no: req?.body?.pageNo,
+                            per_page: req?.body?.dataPerPage,
+                            total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
+                            result
+                        },
+                        message: 'brands are loaded.'
+                    })
+                }
+
             })
         }
     })

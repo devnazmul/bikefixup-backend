@@ -8,5 +8,5 @@ module.exports = {
     Nodemailer,
     Auth,
     State,
-    City
+    City,
 }
