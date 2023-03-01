@@ -95,7 +95,7 @@ const UserLogin = async (req, res) => {
                         })
                     } else {
                         if (result) {
-                            jwt.sign({ id: results[0].id, name: results[0].name, role: results[0].role }, process.env.JWT_SECRET, { expiresIn: `${results[0].role === 'admin' ? '10m' : '7d'}` }, (error, token) => {
+                            jwt.sign({ id: results[0].id, name: results[0].name, role: results[0].role }, process.env.JWT_SECRET, { expiresIn: `${results[0].role === 'admin' ? '7m' : '7d'}` }, (error, token) => {
                                 if (error) {
                                     res.status(500).send({
                                         error: true,
