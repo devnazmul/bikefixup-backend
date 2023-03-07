@@ -36,7 +36,7 @@ const UserRegistration = async (req, res) => {
                     })
                 } else {
                     // INSERT USER INTO DATABASE 
-                    const insertQuery = `INSERT INTO users (role,active_state,name,email,phone,password,state_id,city_id,latitude,longitude) VALUES (?,?,?,?,?,?,?,?,?,?)`;
+                    const insertQuery = `INSERT INTO users (role,active_state,name,email,phone,password,state_id,city_id,latitude,longitude,profile) VALUES (?,?,?,?,?,?,?,?,?,?,?)`;
                     connection.query(insertQuery, data, (error, results) => {
                         if (error) {
                             res.status(502).send({
