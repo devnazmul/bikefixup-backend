@@ -4,6 +4,8 @@ const cors = require("cors");
 const colog = require('colog');
 const routes = require('./routes');
 const connection = require('./db');
+const bodyParser = require('body-parser');
+
 
 require('dotenv').config()
 
@@ -14,7 +16,9 @@ const app = express()
 // MIDDLEWARE ===========================================================
 app.use(cors());
 app.use(express.json());
-
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static("public"));
+app.use("/uploads", express.static("uploads"))
 
 
 // TEST ROUTE ===========================================================
@@ -30,9 +34,10 @@ app.get('/', (req, res) => {
 // DASHBOARD 
 app.use('/api/v1/auth', routes?.Auth);
 app.use('/api/v1/dashboard/user', routes?.User);
-app.use('/api/v1/dashboard/brand', routes?.Brand);
 app.use('/api/v1/dashboard/state', routes?.State);
 app.use('/api/v1/dashboard/city', routes?.City);
+app.use('/api/v1/dashboard/brand', routes?.Brand);
+app.use('/api/v1/dashboard/model', routes?.Model);
 
 app.use('/api/v1/contact-mail', routes?.Nodemailer);
 

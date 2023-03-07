@@ -6,9 +6,9 @@ const Create = async (req, res) => {
         req.body.is_serviceable,
     ]
 
-    // CHECK USER DUPLICATION 
-    const checkEmailQuery = `SELECT * FROM states WHERE name = ?`;
-    connection.query(checkEmailQuery, [req.body.name], (error, results) => {
+    // CHECK OFFER DUPLICATION 
+    const checkNameQuery = `SELECT * FROM states WHERE name = ?`;
+    connection.query(checkNameQuery, [req.body.name], (error, results) => {
         if (error) {
             res.status(500).send({
                 error: true,
@@ -18,14 +18,14 @@ const Create = async (req, res) => {
         }
 
         if (results.length > 0) {
-            res.status(500).send({
+            res.status(409).send({
                 error: true,
                 data: [],
                 message: `State is already exist!`
             })
         } else {
 
-            // INSERT USER INTO DATABASE 
+            // INSERT OFFER INTO DATABASE 
             const insertQuery = `INSERT INTO states (name,is_serviceable) VALUES (?,?)`;
             connection.query(insertQuery, data, (error, results) => {
                 if (error) {

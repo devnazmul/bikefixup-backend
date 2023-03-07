@@ -3,23 +3,21 @@ const connection = require('../../../db');
 const Create = async (req, res) => {
     const data = [
         req.body.name,
-        parseInt(req.body.active_state),
-        req.protocol + '://' + req.get('host') + '/' + req.file.path.replace(/\\/g, '/'),
+        req.body.active_state,
+        req.body.logo,
     ]
-    console.log(req.body)
     // CHECK BRAND DUPLICATION 
     const checkNameQuery = `SELECT * FROM brands WHERE name = ?`;
-
     connection.query(checkNameQuery, [req.body.name], (error, results) => {
         if (error) {
-            res.status(409).send({
+            res.status(500).send({
                 error: true,
                 data: [],
                 message: `Something is wrong!`
             })
         } else {
             if (results.length > 0) {
-                res.status(500).send({
+                res.status(409).send({
                     error: true,
                     data: [],
                     message: `${req.body.name} is already exist in database!`
@@ -49,13 +47,11 @@ const Create = async (req, res) => {
 }
 
 const ReadAll = async (req, res) => {
-    let getAllBrandsQuery = `SELECT * FROM brands ORDER BY name;`
-    let getCountAllBrandsQuery = `SELECT COUNT(*) FROM brands`
+    let getAllCitiesQuery = `SELECT * FROM brands ORDER BY name;`
     if (req.query.id) {
-        getAllBrandsQuery = `SELECT * FROM brands WHERE id=${parseInt(req.query.id)} ORDER BY name;`
-        getCountAllBrandsQuery = `SELECT COUNT(*) FROM brands WHERE id=${parseInt(req.query.id)} `
+        getAllCitiesQuery = `SELECT * FROM brands WHERE id=${parseInt(req.query.id)} ORDER BY name;`
     }
-    connection.query(getCountAllBrandsQuery, (error1, result1) => {
+    connection.query(countTotalBrandsQery, (error1, result1) => {
         if (error1) {
             res.status(500).send({
                 error: true,
@@ -63,27 +59,16 @@ const ReadAll = async (req, res) => {
                 message: `Something is wrong!`
             })
         } else {
-            connection.query(getAllBrandsQuery, (error1, result) => {
-                if (error1) {
-                    res.status(500).send({
-                        error: true,
-                        data: [error1],
-                        message: `Something is wrong!`
-                    })
-                } else {
-                    res.status(200).send({
-                        error: false,
-                        data: {
-                            total_data: result1[0]['COUNT(*)'],
-                            page_no: req?.body?.pageNo,
-                            per_page: req?.body?.dataPerPage,
-                            total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
-                            result
-                        },
-                        message: 'brands are loaded.'
-                    })
-                }
-
+            res.status(200).send({
+                error: false,
+                data: {
+                    total_data: result1[0]['COUNT(*)'],
+                    page_no: req?.body?.pageNo,
+                    per_page: req?.body?.dataPerPage,
+                    total_pages: Math.ceil(result1[0]['COUNT(*)'] / req?.body?.dataPerPage),
+                    result
+                },
+                message: 'brands are loaded.'
             })
         }
     })
@@ -137,13 +122,12 @@ const ReadWithPagination = async (req, res) => {
 }
 
 const Update = async (req, res) => {
-
-    if (req.query.id && req.body.name) {
-        const data = req.protocol + '://' + req.get('host') + '/' + req.file.path.replace(/\\/g, '/') ? [req.body?.name, req.protocol + '://' + req.get('host') + '/' + req.file.path.replace(/\\/g, '/')] : [req.body?.name]
-        const updateBrandQuery = req.protocol + '://' + req.get('host') + '/' + req.file.path.replace(/\\/g, '/') ?
-            `UPDATE brands SET name=? , logo=?  WHERE id=${req.query.id}`
+    if (req.body.id && req.body.name) {
+        const data = req.body.logo ? [req.body?.name, req.body?.logo] : [req.body?.name]
+        const updateBrandQuery = req.body.logo ?
+            `UPDATE brands SET name=? , logo=?  WHERE id=${req.body.id}`
             :
-            `UPDATE brands SET name=?  WHERE id=${req.query.id}`;
+            `UPDATE brands SET name=?  WHERE id=${req.body.id}`;
 
         connection.query(updateBrandQuery, data, (error, results) => {
             if (error) {
@@ -164,7 +148,7 @@ const Update = async (req, res) => {
         res.status(400).send({
             error: true,
             data: [],
-            message: `Name and id are required.`
+            message: `name and id are required.`
         })
     }
 }

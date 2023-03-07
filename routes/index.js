@@ -11,6 +11,8 @@ const User = require('./Dashboard/User/UserRoutes');
 
 const Brand = require('./Dashboard/Brand/BrandRoutes');
 
+const Model = require('./Dashboard/Model/ModelRoutes');
+
 
 
 
@@ -18,8 +20,9 @@ const Brand = require('./Dashboard/Brand/BrandRoutes');
 module.exports = {
     Nodemailer,
     User,
-    Brand,
     Auth,
     State,
-    City
+    City,
+    Brand,
+    Model,
 }

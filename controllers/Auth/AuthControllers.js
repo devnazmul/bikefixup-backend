@@ -18,10 +18,10 @@ const UserRegistration = async (req, res) => {
             parseFloat(req.body.longitude),
         ]
         // CHECK USER DUPLICATION 
-        const checkEmailQuery = `SELECT * FROM users WHERE email = ?`;
-        connection.query(checkEmailQuery, [req.body.email], (error, results) => {
+        const checkEmailQuery = `SELECT * FROM users WHERE email = ? OR phone = ?`;
+        connection.query(checkEmailQuery, [req.body.email, req.body.phone], (error, results) => {
             if (error) {
-                res.status(502).send({
+                res.status(409).send({
                     error: true,
                     data: [error],
                     message: `Something is wrong!`
@@ -138,6 +138,43 @@ const UserLogin = async (req, res) => {
 
 
     })
+}
+
+// UPLOAD IMAGE
+const UpdateImage = async (req, res) => {
+    if (req.id === req.body.id) {
+        if (req.body.id && req.file.path) {
+            const updateUserQuery = `UPDATE users SET profile=? WHERE id=${req.body.id}`;
+            connection.query(updateUserQuery, [req.protocol + '://' + req.get('host') + '/' + req.file.path.replace(/\\/g, '/')], (error, results) => {
+                if (error) {
+                    res.status(500).send({
+                        error: true,
+                        data: [error],
+                        message: `Something is wrong!`
+                    })
+                }
+                res.status(200).send({
+                    error: false,
+                    data: results,
+                    message: 'Profile picture updated successfully.'
+                })
+            })
+        } else {
+            res.status(500).send({
+                error: true,
+                data: [error],
+                message: `id and image is required!`
+            })
+        }
+    } else {
+        res.status(401).send({
+            error: true,
+            data: [error],
+            message: `Unauthenticated!`
+        })
+    }
+
+
 }
 
 // CHECK IS PHONE NUMBER IS EXIST 
