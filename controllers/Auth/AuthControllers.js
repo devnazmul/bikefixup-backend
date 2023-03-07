@@ -16,6 +16,7 @@ const UserRegistration = async (req, res) => {
             parseInt(req.body.city_id),
             parseFloat(req.body.latitude),
             parseFloat(req.body.longitude),
+            `https://i.ibb.co/02q5FpM/avater.png`
         ]
         // CHECK USER DUPLICATION 
         const checkEmailQuery = `SELECT * FROM users WHERE email = ? OR phone = ?`;
